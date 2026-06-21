@@ -7,7 +7,7 @@ const app = express();
 const CLIENT_ID = '1518313679525904586';
 const CLIENT_SECRET = 'FJK8-g9m1_rXY9cTyS93-MEvgWqYRcc_';
 const GUILD_ID = '1517257709592907898';
-const REQUIRED_ROLE = '1518261451167629343';
+const REQUIRED_ROLE = '1518263882127249579';
 const REDIRECT_URI = process.env.REDIRECT_URI || 'https://imt-auth-production.up.railway.app/callback';
 
 app.use(express.static('public'));
