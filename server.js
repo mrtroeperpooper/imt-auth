@@ -8,12 +8,10 @@ const CLIENT_ID = '1518313679525904586';
 const CLIENT_SECRET = 'FJK8-g9m1_rXY9cTyS93-MEvgWqYRcc_';
 const GUILD_ID = '1517257709592907898';
 const REQUIRED_ROLE = '1518261451167629343';
-const REDIRECT_URI = process.env.REDIRECT_URI || 'https://jouw-app.railway.app/callback';
-const DOWNLOAD_FILE = './ImageMagicTool-Setup-v3.2.exe';
+const REDIRECT_URI = process.env.REDIRECT_URI || 'https://imt-auth-production.up.railway.app/callback';
 
 app.use(express.static('public'));
 
-// Stap 1: Stuur gebruiker naar Discord login
 app.get('/login', (req, res) => {
     const params = new URLSearchParams({
         client_id: CLIENT_ID,
@@ -24,13 +22,11 @@ app.get('/login', (req, res) => {
     res.redirect(`https://discord.com/oauth2/authorize?${params}`);
 });
 
-// Stap 2: Discord stuurt gebruiker terug met een code
 app.get('/callback', async (req, res) => {
     const { code } = req.query;
     if (!code) return res.redirect('/?error=no_code');
 
     try {
-        // Wissel code in voor access token
         const tokenRes = await axios.post('https://discord.com/api/oauth2/token',
             new URLSearchParams({
                 client_id: CLIENT_ID,
@@ -44,7 +40,6 @@ app.get('/callback', async (req, res) => {
 
         const { access_token } = tokenRes.data;
 
-        // Check of gebruiker in de server zit met de juiste rol
         const memberRes = await axios.get(
             `https://discord.com/api/users/@me/guilds/${GUILD_ID}/member`,
             { headers: { Authorization: `Bearer ${access_token}` } }
@@ -54,16 +49,13 @@ app.get('/callback', async (req, res) => {
         const username = memberRes.data.nick || memberRes.data.user?.username || 'Gebruiker';
 
         if (roles.includes(REQUIRED_ROLE)) {
-            // Heeft de rol → directe download via Netlify
             res.redirect('https://imagemagictool.netlify.app/ImageMagicTool-Setup-v3.2.exe');
         } else {
-            // Geen rol → melding
             res.redirect(`/?error=no_role&name=${encodeURIComponent(username)}`);
         }
 
     } catch (err) {
         console.error(err.response?.data || err.message);
-        // Niet in server → melding
         res.redirect('/?error=not_in_server');
     }
 });
